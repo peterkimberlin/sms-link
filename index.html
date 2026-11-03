@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>문자 보내기</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;padding:20px;background:#f6f4f0;color:#222}
+.box{max-width:480px;margin:auto;background:#fff;border-radius:14px;padding:20px;box-shadow:0 2px 8px #0001}
+h1{font-size:20px;margin:0 0 12px}
+.to{font-size:22px;font-weight:700;margin:6px 0 14px}
+textarea{width:100%;box-sizing:border-box;min-height:160px;font-size:16px;padding:10px;border:1px solid #ccc;border-radius:8px}
+a.btn,button{display:block;width:100%;box-sizing:border-box;text-align:center;margin-top:12px;padding:16px;font-size:18px;border-radius:10px;border:0;text-decoration:none}
+a.btn{background:#8b1e2d;color:#fff;font-weight:700}
+button{background:#e7e2da;color:#222}
+.err{color:#b00}
+</style></head><body><div class="box">
+<h1>서초모아 추진위 답장 문자</h1>
+<div id="app"></div>
+</div>
+<script>
+(function(){
+  var src = location.hash.length>1 ? location.hash.slice(1) : location.search.slice(1);
+  var p = new URLSearchParams(src);
+  var to = (p.get('to')||'').replace(/[^0-9+]/g,'');
+  var body = p.get('body')||'';
+  var app = document.getElementById('app');
+  if(!to){ app.innerHTML='<p class="err">받는 번호가 없습니다.</p>'; return; }
+  var fmt = to.replace(/^(01\d)(\d{3,4})(\d{4})$/,'$1-$2-$3');
+  app.innerHTML = '<div>받는 사람</div><div class="to"></div><div>문구 (보내기 전에 고칠 수 있어요)</div><textarea id="t"></textarea>'+
+    '<a class="btn" id="go" href="#">문자 앱 열기</a><button id="cp">문구 복사</button>';
+  app.querySelector('.to').textContent = fmt;
+  var t = document.getElementById('t'); t.value = body;
+  function link(){ return 'sms:'+to+'?body='+encodeURIComponent(t.value); }
+  var go = document.getElementById('go');
+  go.href = link(); t.addEventListener('input',function(){ go.href = link(); });
+  document.getElementById('cp').onclick=function(){
+    (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject()).then(function(){ this.textContent='복사됨'; }.bind(this),function(){ t.select(); document.execCommand('copy'); });
+  };
+})();
+</script></body></html>
